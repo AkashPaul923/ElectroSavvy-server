@@ -28,6 +28,21 @@ async function run() {
     await client.connect();
 
 
+    const serviceCollection = client.db('ElectroSavvyDB').collection('Services')
+
+
+
+    // services APIs
+    app.get('/services', async (req, res) => {
+      const { search } = req.query
+      let option = {}
+      if(search){
+        option = {serviceName : { $regex : search , $options : 'i' }}
+      }
+      const result = await serviceCollection.find(option).toArray()
+      res.send(result)
+    })
+
 
     
     // Send a ping to confirm a successful connection
@@ -35,7 +50,7 @@ async function run() {
     console.log("Pinged your deployment. You successfully connected to MongoDB!");
   } finally {
     // Ensures that the client will close when you finish/error
-    await client.close();
+    // await client.close();
   }
 }
 run().catch(console.dir);
