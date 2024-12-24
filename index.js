@@ -52,7 +52,20 @@ async function run() {
       res.send(result)
     })
 
+    app.post('/services', async (req, res)=>{
+      const newService = req.body
+      const result = await serviceCollection.insertOne(newService)
+      res.send(result)
+    })
+
     // Booked Collection APIs
+    app.get('/booked-services', async (req, res)=>{
+      const {email} = req.query
+      const option = {currentUserEmail: email}
+      const result = await bookedServicesCollection.find(option).toArray()
+      res.send(result)
+    })
+
     app.post('/booked-services', async (req, res)=>{
       const newBookedService = req.body
       const result = await bookedServicesCollection.insertOne(newBookedService)
