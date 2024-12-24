@@ -29,6 +29,7 @@ async function run() {
 
 
     const serviceCollection = client.db('ElectroSavvyDB').collection('Services')
+    const bookedServicesCollection = client.db('ElectroSavvyDB').collection('BookedServices')
 
 
 
@@ -48,6 +49,13 @@ async function run() {
       const id = req.params.id
       const query = {_id : new ObjectId(id)}
       const result = await serviceCollection.findOne(query)
+      res.send(result)
+    })
+
+    // Booked Collection APIs
+    app.post('/booked-services', async (req, res)=>{
+      const newBookedService = req.body
+      const result = await bookedServicesCollection.insertOne(newBookedService)
       res.send(result)
     })
 
