@@ -58,7 +58,26 @@ async function run() {
       const result = await serviceCollection.find(option).toArray()
       res.send(result)
     })
-    
+
+    app.patch('/update-service/:id', async (req, res)=>{
+      const id = req.params.id
+      const updateData = req.body
+      // console.log(updateData)
+      const query = {_id : new ObjectId(id)}
+      const update = {
+        $set: { 
+          serviceName : updateData.serviceName, 
+          serviceImage : updateData.serviceImage, 
+          servicePrice : updateData.servicePrice, 
+          ServiceArea : updateData.ServiceArea , 
+          description : updateData.description
+        },
+      }
+      const result = await serviceCollection.updateOne( query , update )
+      res.send(result)
+    })
+
+
     app.post('/services', async (req, res)=>{
       const newService = req.body
       const result = await serviceCollection.insertOne(newService)
