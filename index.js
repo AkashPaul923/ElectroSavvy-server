@@ -9,7 +9,7 @@ const port = process.env.PORT ||5000;
 
 
 app.use(cors({
-  origin: ['http://localhost:5173/'],
+  origin: ['http://localhost:5173'],
   credentials: true,
 }));
 app.use(express.json());
@@ -54,7 +54,7 @@ async function run() {
     const bookedServicesCollection = client.db('ElectroSavvyDB').collection('BookedServices')
 
     // Auth APIs
-    app.post('/jwt', async (req, res)=> {
+    app.post('/jwt', (req, res)=> {
       const user = req.body
       const token = jwt.sign( user, process.env.ACCESS_TOKEN_SECRET, {expiresIn : '1h'})
       res.cookie('token', token, {
@@ -82,21 +82,26 @@ async function run() {
     })
 
 
-    app.get('/service-detail/:id', async (req,res)=>{
+    app.get('/service-detail/:id', verifyToken, async (req,res)=>{
       const id = req.params.id
       const query = {_id : new ObjectId(id)}
       const result = await serviceCollection.findOne(query)
       res.send(result)
     })
 
-    app.get('/manage-services', async (req, res)=>{
+    app.get('/manage-services', verifyToken, async (req, res)=>{
       const {email} = req.query
+
+      if(req.user.email !== email){
+        return res.status(403).send({message: 'Forbidden Access'})
+      }
+
       const option = { serviceProviderEmail: email }
       const result = await serviceCollection.find(option).toArray()
       res.send(result)
     })
 
-    app.patch('/update-service/:id', async (req, res)=>{
+    app.patch('/update-service/:id', verifyToken, async (req, res)=>{
       const id = req.params.id
       const updateData = req.body
       // console.log(updateData)
@@ -115,13 +120,13 @@ async function run() {
     })
 
 
-    app.post('/services', async (req, res)=>{
+    app.post('/services', verifyToken, async (req, res)=>{
       const newService = req.body
       const result = await serviceCollection.insertOne(newService)
       res.send(result)
     })
 
-    app.delete("/services/:id", async (req,res)=>{
+    app.delete("/services/:id", verifyToken, async (req,res)=>{
       const id = req.params.id
       const query = {_id : new ObjectId(id)}
       const result = await serviceCollection.deleteOne(query)
@@ -129,20 +134,25 @@ async function run() {
     })
 
     // Booked Collection APIs
-    app.get('/booked-services', async (req, res)=>{
+    app.get('/booked-services', verifyToken, async (req, res)=>{
       const {email} = req.query
+
+      if(req.user.email !== email){
+        return res.status(403).send({message: 'Forbidden Access'})
+      }
+
       const option = {currentUserEmail: email}
       const result = await bookedServicesCollection.find(option).toArray()
       res.send(result)
     })
 
-    app.post('/booked-services', async (req, res)=>{
+    app.post('/booked-services', verifyToken, async (req, res)=>{
       const newBookedService = req.body
       const result = await bookedServicesCollection.insertOne(newBookedService)
       res.send(result)
     })
 
-    app.delete("/booked-services/:id", async (req,res)=>{
+    app.delete("/booked-services/:id", verifyToken, async (req,res)=>{
       const id = req.params.id
       const query = {_id : new ObjectId(id)}
       const result = await bookedServicesCollection.deleteOne(query)
