@@ -56,6 +56,7 @@ async function run() {
 
     const serviceCollection = client.db('ElectroSavvyDB').collection('Services')
     const bookedServicesCollection = client.db('ElectroSavvyDB').collection('BookedServices')
+    const commentsCollection = client.db('ElectroSavvyDB').collection('comments')
 
     // Auth APIs
     app.post('/jwt', (req, res)=> {
@@ -196,6 +197,14 @@ async function run() {
 
       const option = {serviceProviderEmail: email}
       const result = await bookedServicesCollection.find(option).toArray()
+      res.send(result)
+    })
+
+
+    // comments apis
+    app.get('/comments', async (req, res )=>{
+      
+      result = await commentsCollection.find().toArray()
       res.send(result)
     })
 
