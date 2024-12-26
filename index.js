@@ -87,6 +87,11 @@ async function run() {
       res.send(result)
     })
 
+    app.get('/trending-services', async (req, res) => {
+      const result = await serviceCollection.find().limit(6).toArray()
+      res.send(result)
+    })
+
 
     app.get('/service-detail/:id', verifyToken, async (req,res)=>{
       const id = req.params.id
@@ -166,7 +171,7 @@ async function run() {
     })
 
 
-    app.patch("/booked-services/:id", async (req,res)=>{
+    app.patch("/booked-services/:id", verifyToken, async (req,res)=>{
       const id = req.params.id
       const updateData = req.body
 
@@ -182,12 +187,12 @@ async function run() {
     })
 
     // service to do apis
-    app.get('/to-do-services', async (req, res)=>{
+    app.get('/to-do-services', verifyToken, async (req, res)=>{
       const {email} = req.query
 
-      // if(req.user.email !== email){
-      //   return res.status(403).send({message: 'Forbidden Access'})
-      // }
+      if(req.user.email !== email){
+        return res.status(403).send({message: 'Forbidden Access'})
+      }
 
       const option = {serviceProviderEmail: email}
       const result = await bookedServicesCollection.find(option).toArray()
